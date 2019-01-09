@@ -1,0 +1,4 @@
+test*
+.directory
+__pycache__
+.vscode/
