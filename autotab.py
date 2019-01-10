@@ -7,17 +7,20 @@ subversion=1
 
 
 # parser definition + arguments
-parser = argparse.ArgumentParser(description='Convert ASCII guitar tabs to LaTeX compatible leadsheets.')
+parser = argparse.ArgumentParser(description='Convert ASCII guitar tabs to LaTeX compatible leadsheets.', prog='AutoTab')
 
-parser.add_argument('--version',  action='store_true', help='show version number')
+
+parser.add_argument('-o','--output', help='write output to file', type=argparse.FileType('w'))
+
+parser.add_argument('-l', '--lang', help='source language, usefull for correct syllables (default: \'en_US\')', default='en_US')
+parser.add_argument('--full_words', help='don\'t split words in syllables', action='store_true')
+parser.add_argument('--punct', help='split adjacent punctuation, e.g. \'^*{A}example ,\'', action='store_true')
+parser.add_argument('--overlap', help='set length for using ^-{} in stead of ^{} (default: auto)', choices=['always', 'never', 'auto'], default='auto')
+
+parser.add_argument('--version', action='version', version='%s %d.%d'%(parser.prog, version,subversion))
 parser.add_argument('--verbose', '-v', action='store_true', help='show more (debug) information')
-parser.add_argument('--output', '-o', help='write output to file', type=argparse.FileType('w'))
-parser.add_argument('-l', '--lang', help='source language', default='en_US')
-parser.add_argument('--full_words', help='don\'t split syllables', action='store_true')
-parser.add_argument('--punct', help='split adjacent punctuation', action='store_true')
-parser.add_argument('--overlap_thr', help='set length for using ^-{} in stead of ^{}, default: 1', type=int, default=1)
 
-parser.add_argument('input', type=argparse.FileType('r'))
+parser.add_argument('input', metavar='input file', type=argparse.FileType('r'))
 
 args=parser.parse_args()
 
@@ -44,11 +47,14 @@ def interval(value, ls):
 
 ####################
 
-if args.version and not verbose:
-    print ("AutoTab %d.%d"%(version, subversion))
-    
+   
 if not args.full_words:
-    hyph = Hyphenator(args.lang)
+    try:
+        hyph = Hyphenator(args.lang)
+    except:
+        if verbose:
+            print('WARNING: could not fetch dictionary for %s, using --full_words.'%(args.lang))
+            args.full_words=True
 
 data=args.input.read().split('\n')
 args.input.close()
@@ -107,7 +113,7 @@ for line in lines:
 
         ## find word positions
         prevchar=''
-        splitchars=' \t.,;:\'"-'
+        splitchars=' \t.,;:\'"-()[]{}'
         for i, char in enumerate(textline):
             if char not in splitchars and prevchar in splitchars:
                 wordstarts.append(i)
@@ -185,16 +191,26 @@ if verbose:
 
 output_text = ''
 
-for line in splitted_lines:
+for line in splitted_lines: 
     for piece in line:
         if len(piece['text'].strip())==0:
             output_text+=' '
         if piece['chord']: 
-            output_text+='^%s{%s}'%('*' if not piece['loose'] else '', piece['chord'])
+            #overlap
+            if args.overlap=='always':
+                overlap='-'
+            elif args.overlap=='auto':
+                if len(piece['chord'])>=len(piece['text']):
+                    overlap='-'
+                else:
+                    overlap=''
+            else:
+                overlap=''
+            output_text+='^%s%s{%s}'%('*' if not piece['loose'] else '', overlap, piece['chord'])
         if len(piece['text'].strip())==0:
             output_text+=''
         else:
-            output_text+=piece['text']
+            output_text+=piece['text'].replace('[', '$[$').replace(']', '$]$')
         if not piece['loose']:
             output_text+=' '
     output_text+=' \\\\\n' 
@@ -205,7 +221,11 @@ if args.output:
     args.output.write(output_text)
     args.output.close()
 else:
+    if verbose:
+        print('* Output:\n[[')
     print(output_text)
+    if verbose:
+        print(']]')
 
 if verbose:
     print('* Done.')
