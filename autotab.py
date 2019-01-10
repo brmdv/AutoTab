@@ -148,7 +148,7 @@ for line in lines:
         ## add to list
         current=[]
         ### add everything before first chord
-        if chorded_parts[0][0][0]>0:
+        if chorded_parts[0][0][0]:
             current.append({'text': textline[0:chorded_parts[0][0][0]], 'chord': None, 'loose':True})
         ### add middle
         for i,part in enumerate(chorded_parts):
@@ -184,7 +184,10 @@ for line in splitted_lines:
             output_text+=' '
         if piece['chord']: 
             output_text+='^%s{%s}'%('*' if not piece['loose'] else '', piece['chord'])
-        output_text+=piece['text']
+        if len(piece['text'].strip())==0:
+            output_text+=''
+        else:
+            output_text+=piece['text']
         if not piece['loose']:
             output_text+=' '
     output_text+=' \\\\\n' 
