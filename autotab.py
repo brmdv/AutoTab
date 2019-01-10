@@ -7,7 +7,7 @@ subversion=1
 
 
 # parser definition + arguments
-parser = argparse.ArgumentParser(description='Convert ASCII guitar tabs to LaTeX compatible leadsheets.', prog='AutoTab')
+parser = argparse.ArgumentParser(description='Convert ASCII lyrics with guitar chords to LaTeX compatible leadsheets.', prog='AutoTab')
 
 
 parser.add_argument('-o','--output', help='write output to file', type=argparse.FileType('w'))
@@ -108,7 +108,7 @@ for line in lines:
         textline=textline.ljust(length, ' ')
 
         # split text into words and, if necessary, syllables
-        wordstarts=[]
+        wordstarts=[0]
         syllstarts=[]
 
         ## find word positions
@@ -118,6 +118,8 @@ for line in lines:
             if char not in splitchars and prevchar in splitchars:
                 wordstarts.append(i)
             elif char in splitchars and prevchar not in splitchars:
+                wordstarts.append(i)
+            elif char==' ' and prevchar in splitchars[2:] :
                 wordstarts.append(i)
             prevchar=char
 
@@ -163,7 +165,7 @@ for line in lines:
                 'chord': part[1],
             })
 
-            if not part[0][1] or i==len(chorded_parts)-1:
+            if not part[0][1] or i==len(chorded_parts)-1 or len(current[-1]['text'].strip())==0:
                 current[-1]['loose']=True
             elif args.punct:
                 current[-1]['loose']=textline[part[0][1]]==' ' 
@@ -200,7 +202,7 @@ for line in splitted_lines:
             if args.overlap=='always':
                 overlap='-'
             elif args.overlap=='auto':
-                if len(piece['chord'])>=len(piece['text']):
+                if len(piece['chord'])>=len(piece['text']) and len(piece['text'].strip())>0:
                     overlap='-'
                 else:
                     overlap=''
@@ -208,7 +210,7 @@ for line in splitted_lines:
                 overlap=''
             output_text+='^%s%s{%s}'%('*' if not piece['loose'] else '', overlap, piece['chord'])
         if len(piece['text'].strip())==0:
-            output_text+=''
+            output_text+=' '
         else:
             output_text+=piece['text'].replace('[', '$[$').replace(']', '$]$')
         if not piece['loose']:
@@ -223,7 +225,7 @@ if args.output:
 else:
     if verbose:
         print('* Output:\n[[')
-    print(output_text)
+    print(output_text.strip())
     if verbose:
         print(']]')
 
