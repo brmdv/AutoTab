@@ -18,7 +18,7 @@ python autotab.py [-h] [-o OUTPUT] [-l LANG] [--full_words] [--punct]
                input file
 ```
 
-###  Argumenten:
+###  Arguments:
 
 * `-h`: show help
 * `-o OUTPUT`: enter file name `OUTPUT` where output will be saved. If not specified, output is printed in terminal.
