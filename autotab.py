@@ -3,7 +3,7 @@ import argparse
 from hyphen import Hyphenator
 
 version=0
-subversion=1
+subversion=3
 
 
 # parser definition + arguments
@@ -54,7 +54,7 @@ if not args.full_words:
     except:
         if verbose:
             print('WARNING: could not fetch dictionary for %s, using --full_words.'%(args.lang))
-            args.full_words=True
+        args.full_words=True
 
 data=args.input.read().split('\n')
 args.input.close()
