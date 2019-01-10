@@ -95,8 +95,8 @@ for line in lines:
         splitted_lines.append([{'text': line['text'], 'chord': None, 'loose': True }])
     else:
         # make same length
-        chordline=line['chords']
-        textline=line['text']
+        chordline=line['chords']+' '
+        textline=line['text']+' '
         length=max(len(chordline), len(textline))
         chordline=chordline.ljust(length, ' ')
         textline=textline.ljust(length, ' ')
@@ -138,14 +138,13 @@ for line in lines:
             elif (char==' ' or i==len(chordline)-1) and position>=0:
                 # end of chord
                 chorded_parts.append((interval(position,break_positions),current_chord))
-
                 current_chord=''
                 position=-1
             elif position>=0:
                 current_chord+=char
-
             prevchar=char
-        if position>=0: chorded_parts.append((interval(position,break_positions),current_chord))
+        if position>=0: 
+            chorded_parts.append((interval(position,break_positions),current_chord))
         ## add to list
         current=[]
         ### add everything before first chord
@@ -156,7 +155,7 @@ for line in lines:
             current.append({
                 'text': textline[part[0][0]:part[0][1]],
                 'chord': part[1],
-                'loose': True if not part[0][1] else textline[part[0][1]+1] in splitchars
+                'loose': True if (not part[0][1] or i==len(chorded_parts)-1) else textline[part[0][1]] in splitchars
             })
             #### add normal text inbetween
             if part[0][1] and i<len(chorded_parts)-1:
@@ -181,9 +180,13 @@ output_text = ''
 
 for line in splitted_lines:
     for piece in line:
+        if len(piece['text'].strip())==0:
+            output_text+=' '
         if piece['chord']: 
             output_text+='^%s{%s}'%('*' if not piece['loose'] else '', piece['chord'])
         output_text+=piece['text']
-    output_text+=' \\\\\n'
+        if not piece['loose']:
+            output_text+=' '
+    output_text+=' \\\\\n' 
 
 print(output_text)
