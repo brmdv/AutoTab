@@ -23,7 +23,7 @@ args=parser.parse_args()
 
 verbose=args.verbose
 
-####################
+#################### HELPER FUNCTIONS
 
 def isChordLn(line):
     return bool(re.match(r'^\s*([A-G]\S*\s*)+$', line))
@@ -31,6 +31,16 @@ def isChordLn(line):
 def prnLine(num, lines):
     print(lines[num]['chords'])
     print(lines[num]['text'])
+
+def interval(value, ls):
+    ls=list(set(ls))
+    if value<ls[0]:
+        return (None,ls[0])
+    for i, val  in enumerate(ls[1:]):
+        if value<val:
+            return (ls[i], val)
+    if value>= ls[-1]:
+        return (ls[-1],None)
 
 ####################
 
@@ -91,22 +101,50 @@ for line in lines:
         chordline=chordline.ljust(length, ' ')
         textline=textline.ljust(length, ' ')
 
-        # split text into syllables
+        # split text into words and, if necessary, syllables
         wordstarts=[]
         syllstarts=[]
 
+        ## find word positions
         prevchar=''
         splitchars=' \t.,;:\'"-'
         for i, char in enumerate(textline):
             if char not in splitchars and prevchar in splitchars:
                 wordstarts.append(i)
+            elif char in splitchars and prevchar not in splitchars:
+                wordstarts.append(i)
             prevchar=char
 
-        wordstarts.append(length)
+        ## find syllable positions
         if not args.full_words:
-            if verbose:
-                print('* splitting words in syllables')
-            syllables=hyph.syllables(textline)
-            for s in syllables:
-                syllstarts.append(len(s)+sum(syllstarts))
-            print(syllstarts)
+            for idx in range(len(wordstarts)-1):
+                sylls=hyph.syllables(textline[wordstarts[idx]:wordstarts[idx+1]])
+                if len(sylls)>1:
+                    for s in sylls[:-1]:
+                        syllstarts.append(wordstarts[idx]+len(s))
+
+        # join text into parts that are separated by chords
+        ## find chord positions
+        prevchar=''
+        current_chord=''
+        position=-1
+        break_positions=list(set(syllstarts+wordstarts))
+        chorded_parts=[]
+        for i, char in enumerate(chordline):
+            # start of chord
+            if char!=' ' and (prevchar=='' or prevchar==' '):
+                position=i
+                current_chord+=char
+            elif (char==' ' or i==len(chordline)-1) and position>=0:
+                # end of chord
+                chorded_parts.append((interval(position,break_positions),current_chord))
+
+                current_chord=''
+                position=-1
+            elif position>=0:
+                current_chord+=char
+
+            prevchar=char
+        if position>=0: chorded_parts.append((interval(position,break_positions),current_chord))
+    pass
+        
