@@ -14,7 +14,7 @@ parser.add_argument('--verbose', '-v', action='store_true', help='show more (deb
 parser.add_argument('--output', '-o', help='write output to file', type=argparse.FileType('w'))
 parser.add_argument('-l', '--lang', help='source language', default='en_US')
 parser.add_argument('--full_words', help='don\'t split syllables', action='store_true')
-parser.add_argument('--split_punct', help='split adjacent punctuation', action='store_true')
+parser.add_argument('--punct', help='split adjacent punctuation', action='store_true')
 parser.add_argument('--overlap_thr', help='set length for using ^-{} in stead of ^{}, default: 1', type=int, default=1)
 
 parser.add_argument('input', type=argparse.FileType('r'))
@@ -155,8 +155,15 @@ for line in lines:
             current.append({
                 'text': textline[part[0][0]:part[0][1]],
                 'chord': part[1],
-                'loose': True if (not part[0][1] or i==len(chorded_parts)-1) else textline[part[0][1]] in splitchars
             })
+
+            if not part[0][1] or i==len(chorded_parts)-1:
+                current[-1]['loose']=True
+            elif args.punct:
+                current[-1]['loose']=textline[part[0][1]]==' ' 
+            else:
+                current[-1]['loose']=textline[part[0][1]] in splitchars
+
             #### add normal text inbetween
             if part[0][1] and i<len(chorded_parts)-1:
                 current.append({
