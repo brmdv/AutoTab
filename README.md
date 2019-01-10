@@ -1,5 +1,20 @@
 # AutoTab
-Convert ASCII lyrics with guitar chords to LaTeX compatible leadsheets.
+Convert ASCII lyrics with guitar chords to LaTeX compatible [leadsheets](https://github.com/cgnieder/leadsheets). 
+
+The LaTeX package *leadsheets* uses a specific syntax to write chords on lyrics:
+
+```latex
+This ^{Am}is a sen^*{F}ten ce in ^-{Gm}a song \\
+```
+
+ However, on the internet, the common way to represent guitar tabs is like this:
+
+```
+     Am      F        Gm
+This is a sentence in a  song
+```
+
+This script converts the latter style to the former. It uses [PyHyphen](https://pypi.org/project/PyHyphen/) to automatically split long words into syllables, so that chords are better aligned.
 
 
 ## Dependancies 
@@ -18,7 +33,7 @@ python autotab.py [-h] [-o OUTPUT] [-l LANG] [--full_words] [--punct]
                input file
 ```
 
-###  Arguments:
+###  Arguments
 
 * `-h`: show help
 * `-o OUTPUT`: enter file name `OUTPUT` where output will be saved. If not specified, output is printed in terminal.
@@ -28,10 +43,10 @@ python autotab.py [-h] [-o OUTPUT] [-l LANG] [--full_words] [--punct]
 * `--overlap {always,never,auto}`: changes usage of `-` in the chords.
   * `always` en `never`: speaks for itself
   * `auto`: (default) Adds `-` to chord when number of characters in chords is equal to or greater than characters in accompanying syllable
-* `--version`: versionnumber
+* `--version`: version number
 * `--verbose`: more information during runtime.
 
-### Example:
+### Example
 
 ```bash
 python autotab.py --lang en_US --punct --verbose -o hotelcali_out.tex hotelcalifornia.txt
