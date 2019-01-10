@@ -3,7 +3,7 @@ import argparse
 from hyphen import Hyphenator
 
 version=0
-subversion=0
+subversion=1
 
 
 # parser definition + arguments
@@ -11,7 +11,7 @@ parser = argparse.ArgumentParser(description='Convert ASCII guitar tabs to LaTeX
 
 parser.add_argument('--version',  action='store_true', help='show version number')
 parser.add_argument('--verbose', '-v', action='store_true', help='show more (debug) information')
-parser.add_argument('-o', '--output', help='write output to file', type=argparse.FileType('w'))
+parser.add_argument('--output', '-o', help='write output to file', type=argparse.FileType('w'))
 parser.add_argument('-l', '--lang', help='source language', default='en_US')
 parser.add_argument('--full_words', help='don\'t split syllables', action='store_true')
 parser.add_argument('--split_punct', help='split adjacent punctuation', action='store_true')
@@ -55,7 +55,7 @@ args.input.close()
 
 if verbose:
     print('Running AutoTab %d.%d...'%(version, subversion))
-    print('inputfile: '+args.input.name)
+    print('input:  '+args.input.name)
     if args.output: print('output: '+ args.output.name)
 
 
@@ -189,4 +189,13 @@ for line in splitted_lines:
             output_text+=' '
     output_text+=' \\\\\n' 
 
-print(output_text)
+if args.output:
+    if verbose:
+        print('* Writing to ' + args.output.name)
+    args.output.write(output_text)
+    args.output.close()
+else:
+    print(output_text)
+
+if verbose:
+    print('* Done.')
