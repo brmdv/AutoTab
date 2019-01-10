@@ -33,7 +33,7 @@ def prnLine(num, lines):
     print(lines[num]['text'])
 
 def interval(value, ls):
-    ls=list(set(ls))
+    ls=sorted(list(set(ls)))
     if value<ls[0]:
         return (None,ls[0])
     for i, val  in enumerate(ls[1:]):
@@ -92,7 +92,7 @@ if not args.full_words:
         print('* splitting words in syllables')
 for line in lines:
     if not 'chords' in line.keys():
-        splitted_lines.append([[line['text'], '']])
+        splitted_lines.append([{'text': line['text'], 'chord': None, 'loose': True }])
     else:
         # make same length
         chordline=line['chords']
@@ -146,5 +146,44 @@ for line in lines:
 
             prevchar=char
         if position>=0: chorded_parts.append((interval(position,break_positions),current_chord))
-    pass
-        
+        ## add to list
+        current=[]
+        ### add everything before first chord
+        if chorded_parts[0][0][0]>0:
+            current.append({'text': textline[0:chorded_parts[0][0][0]], 'chord': None, 'loose':True})
+        ### add middle
+        for i,part in enumerate(chorded_parts):
+            current.append({
+                'text': textline[part[0][0]:part[0][1]],
+                'chord': part[1],
+                'loose': True if not part[0][1] else textline[part[0][1]+1] in splitchars
+            })
+            #### add normal text inbetween
+            if part[0][1] and i<len(chorded_parts)-1:
+                current.append({
+                    'text': textline[part[0][1]:chorded_parts[i+1][0][0]],
+                    'chord': None,
+                    'loose': True
+                })
+        ### add everything behind last chord
+        if chorded_parts[-1][0][1]:
+            current.append({'text': textline[chorded_parts[-1][0][1]:], 'chord': None, 'loose':True})
+
+        ### add to all
+        splitted_lines.append(current)
+
+# output
+
+if verbose:
+    print('* Creating output LaTeX.')
+
+output_text = ''
+
+for line in splitted_lines:
+    for piece in line:
+        if piece['chord']: 
+            output_text+='^%s{%s}'%('*' if not piece['loose'] else '', piece['chord'])
+        output_text+=piece['text']
+    output_text+=' \\\\\n'
+
+print(output_text)
