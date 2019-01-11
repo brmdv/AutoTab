@@ -29,7 +29,8 @@ $ pip install pyhyphen argparse
 
 ```bash
 $ python autotab.py [-h] [-o OUTPUT] [-l LANG] [--full_words] [--punct]
-               [--overlap {always,never,auto}] [--version] [--verbose]
+               [--overlap {always,never,auto}] [--minlength MINLENGTH] 
+               [--version] [--verbose]
                input file
 ```
 
@@ -43,6 +44,7 @@ $ python autotab.py [-h] [-o OUTPUT] [-l LANG] [--full_words] [--punct]
 * `--overlap {always,never,auto}`: changes usage of `-` in the chords.
   * `always` en `never`: speaks for itself
   * `auto`: (default) Adds `-` to chord when number of characters in chords is equal to or greater than characters in accompanying syllable
+* `--minlength N`: minimal word length before splitting is considered
 * `--version`: version number
 * `--verbose`: more information during runtime.
 
