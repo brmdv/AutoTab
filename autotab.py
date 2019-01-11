@@ -16,6 +16,7 @@ parser.add_argument('-l', '--lang', help='source language, usefull for correct s
 parser.add_argument('--full_words', help='don\'t split words in syllables', action='store_true')
 parser.add_argument('--punct', help='split adjacent punctuation, e.g. \'^*{A}example ,\'', action='store_true')
 parser.add_argument('--overlap', help='set length for using ^-{} in stead of ^{} (default: auto)', choices=['always', 'never', 'auto'], default='auto')
+# parser.add_argument('--split-thresh', help='minimal length of word before splitting syllables is an option', type=int
 
 parser.add_argument('--version', action='version', version='%s %d.%d'%(parser.prog, version,subversion))
 parser.add_argument('--verbose', '-v', action='store_true', help='show more (debug) information')
@@ -127,9 +128,12 @@ for line in lines:
         if not args.full_words:
             for idx in range(len(wordstarts)-1):
                 sylls=hyph.syllables(textline[wordstarts[idx]:wordstarts[idx+1]])
+                cursor=wordstarts[idx]
                 if len(sylls)>1:
                     for s in sylls[:-1]:
-                        syllstarts.append(wordstarts[idx]+len(s))
+                        cursor+=len(s)
+                        syllstarts.append(cursor)
+                    pass
 
         # join text into parts that are separated by chords
         ## find chord positions
@@ -165,12 +169,14 @@ for line in lines:
                 'chord': part[1],
             })
 
-            if not part[0][1] or i==len(chorded_parts)-1 or len(current[-1]['text'].strip())==0:
+            if not part[0][1] or len(current[-1]['text'].strip())==0:
                 current[-1]['loose']=True
             elif args.punct:
                 current[-1]['loose']=textline[part[0][1]]==' ' 
             else:
                 current[-1]['loose']=textline[part[0][1]] in splitchars
+
+
 
             #### add normal text inbetween
             if part[0][1] and i<len(chorded_parts)-1:

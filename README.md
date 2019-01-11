@@ -22,13 +22,13 @@ This script converts the latter style to the former. It uses [PyHyphen](https://
 You need *pyhyphen* and *argparse*. Install with
 
 ```bash
-pip install pyhyphen argparse
+$ pip install pyhyphen argparse
 ```
 
 ## Usage
 
 ```bash
-python autotab.py [-h] [-o OUTPUT] [-l LANG] [--full_words] [--punct]
+$ python autotab.py [-h] [-o OUTPUT] [-l LANG] [--full_words] [--punct]
                [--overlap {always,never,auto}] [--version] [--verbose]
                input file
 ```
@@ -48,6 +48,14 @@ python autotab.py [-h] [-o OUTPUT] [-l LANG] [--full_words] [--punct]
 
 ### Example
 
+1. Simple conversion of an English  song.
+
+   ```bash
+   $ python autotab.py hotelcalifornia.txt
+   ```
+
+2. Write to file, specify language and center chords above words without punctuation.
+
 ```bash
-python autotab.py --lang en_US --punct --verbose -o hotelcali_out.tex hotelcalifornia.txt
+$ python autotab.py --lang en_US --punct --verbose -o hotelcali_out.tex hotelcalifornia.txt
 ```
