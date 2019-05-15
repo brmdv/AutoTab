@@ -17,7 +17,7 @@ This is a sentence in a  song
 This script converts the latter style to the former. It uses [PyHyphen](https://pypi.org/project/PyHyphen/) to automatically split long words into syllables, so that chords are better aligned.
 
 
-## Dependancies 
+## Dependencies 
 
 You need *pyhyphen* and *argparse*. Install with
 

@@ -18,7 +18,7 @@ parser.add_argument('--punct', help='split adjacent punctuation, e.g. \'^*{A}exa
 parser.add_argument('--overlap', help='set length for using ^-{} in stead of ^{} (default: auto)', choices=['always', 'never', 'auto'], default='auto')
 parser.add_argument('--minlength', help='minimal length of word before splitting syllables is an option', type=int, default=0)
 
-parser.add_argument('--version', action='version', version='%s %d.%d'%(parser.prog, version,subversion))
+parser.add_argument('--version', action='version', version=f'{parser.prog} {version}.{subversion}')
 parser.add_argument('--verbose', '-v', action='store_true', help='show more (debug) information')
 
 parser.add_argument('input', metavar='input file', type=argparse.FileType('r'))
@@ -30,6 +30,7 @@ verbose=args.verbose
 #################### HELPER FUNCTIONS
 
 def isChordLn(line):
+    '''Checks whether string \'line\'' is a line with next line's chords.'''
     return bool(re.match(r'^\s*([A-G]\S*\s*)+$', line))
 
 def prnLine(num, lines):
@@ -37,6 +38,7 @@ def prnLine(num, lines):
     print(lines[num]['text'])
 
 def interval(value, ls):
+    '''Returns syllable slice which contains char at position \'value\'.'''
     ls=sorted(list(set(ls)))
     if value<ls[0]:
         return (None,ls[0])
@@ -54,14 +56,14 @@ if not args.full_words:
         hyph = Hyphenator(args.lang)
     except:
         if verbose:
-            print('WARNING: could not fetch dictionary for %s, using --full_words.'%(args.lang))
+            print(f'WARNING: could not fetch dictionary for {args.lang}, using --full_words.')
         args.full_words=True
 
 data=args.input.read().split('\n')
 args.input.close()
 
 if verbose:
-    print('Running AutoTab %d.%d...'%(version, subversion))
+    print(f'Running AutoTab {version}.{subversion}...')
     print('input:  '+args.input.name)
     if args.output: print('output: '+ args.output.name)
 
@@ -90,7 +92,7 @@ if verbose:
     count_chords=0
     for line in lines:
         if 'chords' in line: count_chords+=1
-    print('* file successfully imported. %d textlines, whereof %d with chords'%(len(lines), count_chords))
+    print(f'* file successfully imported. {len(lines)} textlines, whereof {count_chords} with chords')
 
 # create split measures
 splitted_lines=[]
@@ -215,7 +217,7 @@ for line in splitted_lines:
                     overlap=''
             else:
                 overlap=''
-            output_text+='^%s%s{%s}'%('*' if not piece['loose'] else '', overlap, piece['chord'])
+            output_text+='^{starred}{overlapped}{{{chord}}}'.format(starred='*' if not piece['loose'] else '', overlapped=overlap, chord=piece['chord'])
         if len(piece['text'].strip())==0:
             output_text+=' '
         else:
